@@ -79,11 +79,6 @@ def registration():
         }), 201)        
             
 
-
-######################################################################################################
-
-# The log in and log out routes need a little refactoring
-
 """ This route allows registered users to log in """
 @v1.route("/auth/login", methods=['POST'])
 def login():
@@ -107,69 +102,76 @@ def login():
     }
 
     log_user = User().log_in_user(credentials)
-    username = User().fetch_specific_user('username', f"id = {log_user}")
-
-    if isinstance(log_user, int):
-        User().connection.close()
-        auth_token = User().encode_auth_token(log_user)
+    try:
+        log_user['f1'] and log_user['f2']
+        auth_token = User().encode_auth_token(log_user['f1'])
         store = {
             "token": auth_token.decode('utf-8'),
             "email": credentials['email']
         }
-        session.permanent = True
-        session[f"{store['email']}"] = store
-        print(session.get(store['email']))
         return make_response(jsonify({
             "status": 201,
             "message": "{} has been successfully logged in".format(data['email']),
             "auth_token": auth_token.decode('utf-8'),
-            "id": log_user,
-            "username": username[0]
+            "id": log_user['f1'],
+            "username": log_user['f2']
         }), 201)
-    else:
-        return make_response(log_user)
+    except:
+        return make_response(jsonify(log_user), log_user['status'])
 
             
 """ This route allows registered users to log out """
-@v1.route("/auth/<int:userId>/logout", methods=['GET'])
+@v1.route("/auth/<int:userId>/logout", methods=['POST'])
 @AuthenticationRequired
 def logout(userId):
-    session.permanent = True
-    print(session.permanent)
-    # remove the user from the session
-    print(session.get(User().fetch_specific_user('email', f"id = '{userId}'")[0]))
+    auth_token = request.headers.get('Authorization')
+    token = auth_token.split(" ")[1]
+    print(token)
 
-    try:
-        email = User().fetch_specific_user('email', f"id = '{userId}'")
-        if session.get(email[0]) != None:
-            session.pop(email[0], None)
+    if User().log_out_user(userId) == False:
+        return make_response(jsonify({
+            "error": "User does not exist!",
+            "status": 404
+        }), 404)
+    else:
+        username = User().log_out_user(userId)
+
+        det = dict(
+            username=username,
+            token=token
+        )
+
+        values = tuple(det.values())
+
+        if User().blacklisted(token):
+            return make_response(jsonify({
+                "error": "Token is blacklisted",
+                "status": 400
+            }), 400)
+        else:
+            User().blacklist(values)
             return make_response(jsonify({
                 "message": "You have been logged out",
                 "status": 200
             }), 200)
-        else:
-            return make_response(jsonify({
-                "error": "You are not logged in",
-                "status": 400
-            }), 400)
-    except:
-        return make_response(jsonify({
-            "error": "user not found or does not exist",
-            "status": 400
-        }), 400)
-######################################################################################################
+
 
 """ This route allows a user to delete their account """
 @v1.route("/profile/<int:userId>", methods=['DELETE'])
 @AuthenticationRequired
 def del_account(userId):
+    auth_token = request.headers.get('Authorization')
+    token = auth_token.split(" ")[1]
 
     remove_user = User().delete_user(userId)
-    email = User().fetch_specific_user('email', f"id = {userId}")
 
-    if isinstance(remove_user, dict) and session.get(email[0]):
-        return make_response(jsonify(remove_user))
-    else:
+    if isinstance(remove_user, dict):
+        return make_response(jsonify(remove_user), 404)
+    elif User().blacklisted(token):
+        return make_response(jsonify({
+            "error": "Please log in first!"
+        }), 400)
+    elif not User().blacklisted(token):
         return make_response(jsonify({
             "message": f"user with id '{userId}' deleted successfully",
             "status": 200
@@ -180,6 +182,8 @@ def del_account(userId):
 @v1.route("/profile/<int:userId>", methods=['PUT', 'GET'])
 @AuthenticationRequired
 def update_account(userId):
+    auth_token = request.headers.get('Authorization')
+    token = auth_token.split(" ")[1]
 
     if request.method == 'PUT':
         data = request.get_json()
@@ -211,10 +215,14 @@ def update_account(userId):
         }    
 
         update_user = User().update_user(userId, user_data)
-        email = User().fetch_specific_user('email', f"id = {userId}")
+        # email = User().fetch_specific_user('email', f"id = {userId}")
 
-        if isinstance(update_user, dict) and session.get(email[0]):
+        if isinstance(update_user, dict):
             return make_response(jsonify(update_user))
+        elif User().blacklisted(token):
+            return make_response(jsonify({
+                "error": "Please log in first!"
+            }), 400)
         else:
             return make_response(jsonify({
                 "message": f"user {user_data['email']} updated successfully",
@@ -249,6 +257,10 @@ def update_account(userId):
                 "user": user_dict,
                 "posts": posts_list
             }), 200)
+        elif User().blacklisted(token):
+            return make_response(jsonify({
+                "error": "Please log in first!"
+            }), 400)
         else:
             return make_response(jsonify({
                 "message": "user not found",

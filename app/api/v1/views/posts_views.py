@@ -40,6 +40,8 @@ def get():
 @AuthenticationRequired
 def post(userId):
     data = request.get_json()
+    auth_token = request.headers.get('Authorization')
+    token = auth_token.split(" ")[1]
     
     if PostValidator().post_fields(data):
         return make_response(jsonify(PostValidator().post_fields(data)), 400)
@@ -56,8 +58,8 @@ def post(userId):
                     "error": error()
                 }), 422)
         
-        try:
-            email = User().fetch_specific_user('email', f"id = {userId}")
+        if User().fetch_specific_user('email', f"id = {userId}"):
+            print('-->', User().fetch_specific_user('email', f"id = {userId}"))
 
             post = {
                 "author_id": userId,
@@ -65,8 +67,7 @@ def post(userId):
                 "body": data['body']
             }
             
-            try:
-                session.get(email[0])
+            if not User().blacklisted(token):
                 post_model = Post(post)
                 if isinstance(post_model.save_post(), dict):
                     return make_response(jsonify(post_model.save_post()))
@@ -82,12 +83,12 @@ def post(userId):
                             "post_id": post_model.fetch_post_id(data['title'])[0],
                         }
                     }), 201)
-            except:
+            else:
                 return make_response(jsonify({
                     "error": "Please log in first!",
                     "status": 403
                 }), 403)
-        except:
+        else:
             return make_response(jsonify({
                 "error": "user not found or does not exist!",
                 "status": 404
@@ -98,6 +99,8 @@ def post(userId):
 @AuthenticationRequired
 def edit_post(postId, userId):
     data = request.get_json()
+    auth_token = request.headers.get('Authorization')
+    token = auth_token.split(" ")[1]
     
     if PostValidator().post_fields(data):
         return make_response(jsonify(PostValidator().post_fields(data)), 400)
@@ -117,12 +120,11 @@ def edit_post(postId, userId):
     if Post().fetch_specific_post('author_id', f"id = {postId}")[0] == userId:
 
         post = Post().update_post(postId, data)
-        email = User().fetch_specific_user('email', f"id = {userId}")
 
         if isinstance(post, dict):
             return make_response(post)
         else:
-            if session.get(email[0]):
+            if not User().blacklisted(token):
                 return make_response(jsonify({
                     "message": "You have successfully updated this post",
                     "status": 200
@@ -143,27 +145,27 @@ def edit_post(postId, userId):
 @v1.route("<int:userId>/posts/<int:postId>", methods=['DELETE'])
 @AuthenticationRequired
 def delete_post(postId, userId):
+    auth_token = request.headers.get('Authorization')
+    token = auth_token.split(" ")[1]
 
     try:
         if Post().fetch_specific_post('author_id', f"id = {postId}")[0] == userId:
             
             post = Post().delete_post(postId)
-            email = User().fetch_specific_user('email', f"id = {userId}")
 
             if isinstance(post, dict):
                 return make_response(jsonify(post), 404)
             else:
-                print(session.get(email[0]))
-                # if session.get(email[0]):
-                return make_response(jsonify({
-                    "error": 'post was deleted successfully',
-                    "status": 200
-                }), 200)
-                # else:
-                #     return make_response(jsonify({
-                #         "error": 'Please log in first',
-                #         "status": 403
-                #     }), 403)
+                if not User().blacklisted(token):
+                    return make_response(jsonify({
+                        "error": 'post was deleted successfully',
+                        "status": 200
+                    }), 200)
+                else:
+                    return make_response(jsonify({
+                        "error": 'Please log in first',
+                        "status": 403
+                    }), 403)
 
         else:
             return make_response(jsonify({

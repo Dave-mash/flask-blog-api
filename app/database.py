@@ -6,7 +6,9 @@ class InitializeDb:
 
     @classmethod
     def __init__(cls, db_url):
+        cls.env = db_url.ENV
         try:
+            print(db_url)
             cls.connection = psycopg2.connect(db_url.DB_URL)
             cls.cursor = cls.connection.cursor()
             print(f'A connection to {db_url.DB_URL} database was established!')
@@ -46,6 +48,12 @@ class InitializeDb:
                 ON UPDATE CASCADE ON DELETE CASCADE,
                 comment TEXT NOT NULL,
                 created_on TIMESTAMP DEFAULT current_timestamp
+            );
+            CREATE TABLE IF NOT EXISTS blacklist(
+                id serial PRIMARY KEY NOT NULL,
+                username VARCHAR REFERENCES users(username)\
+                ON UPDATE CASCADE ON DELETE CASCADE,
+                tokens VARCHAR NOT NULL
             );
             """
         )

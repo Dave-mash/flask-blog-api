@@ -84,17 +84,29 @@ class User(BaseModel):
         password = self.fetch_specific_user('password', f"email = '{details['email']}'")
         
         if not user:
-            return jsonify({
+            return {
                 "error": "Details not found. Try signing up!",
                 "status": 401
-            }), 401
+            }
         elif not check_password_hash(password[0], details['password']):
-            return jsonify({
+            return {
                 "error": "Your email or password is incorrect!",
                 "status": 403
-            }), 403
+            }
         else:
-            return self.fetch_specific_user('id', f"email = '{details['email']}'")[0]
+            return self.base_model.grab_items('(id, username)', f"email = '{details['email']}'")[0]
+
+
+    # Log out user
+    def log_out_user(self, id):
+        """ This method logs in a user """
+
+        user = self.fetch_specific_user('username', f"id = '{id}'")
+        
+        if user:
+            return user[0]
+        else:
+            return False
 
 
     def delete_user(self, id):

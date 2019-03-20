@@ -8,7 +8,7 @@ import datetime
 from functools import wraps, update_wrapper
 from flask import jsonify, request, session
 
-from app import create_app, db_url
+from app import create_app
 from app.database import InitializeDb
 
 class BaseModel(InitializeDb):
@@ -18,11 +18,11 @@ class BaseModel(InitializeDb):
         self.table_name = ''
 
 
-    @staticmethod
-    def encode_auth_token(user_id):
+    @classmethod
+    def encode_auth_token(cls, user_id):
         """ This method generates authentication token """
 
-        app = create_app()
+        app = create_app(cls.env)
 
         try:
             payload = {
@@ -39,16 +39,27 @@ class BaseModel(InitializeDb):
             return e
 
 
-    @staticmethod
-    def blacklisted(self):
-        pass
+    def blacklist(self, details):
+        """ This method black lists tokens """
+
+        self.add_item('username, tokens', details, 'blacklist')
 
 
-    @staticmethod
-    def decode_auth_token(auth_token):
+    def blacklisted(self, token):
+        """ This method checks whether a token blacklisted """
+
+        query = "SELECT id FROM blacklist WHERE tokens = '{}';".format(token)
+        self.cursor.execute(query)
+        if self.cursor.fetchone():
+            return True
+        return False
+
+
+    @classmethod
+    def decode_auth_token(cls, auth_token):
         """ This method takes in token and decodes it """
 
-        app = create_app()
+        app = create_app(cls.env)
 
         try:
             payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'))
@@ -76,6 +87,14 @@ class BaseModel(InitializeDb):
             "SELECT {} FROM {} WHERE {}".format(column, name, condition)
         )
 
+
+    def grab_items(self, column, condition, name=''):
+        """ This method fetches items by name """
+        name = name if name else self.table_name
+        
+        return self.fetch_one(
+            "SELECT row_to_json({}) FROM {} WHERE {}".format(column, name, condition)
+        )
 
     def add_item(self, keys, values, name=''):
         """ This method adds an item """
