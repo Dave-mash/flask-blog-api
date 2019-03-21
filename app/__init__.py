@@ -23,7 +23,7 @@ def create_app(config_name):
     app.register_blueprint(comment_v1)
     
     db = InitializeDb(app_config[config_name])
-
+    db.init_db(app_config[config_name])
     db.create_tables()
     db.connection.commit()
 
