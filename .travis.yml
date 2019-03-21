@@ -6,6 +6,13 @@ python:
 install:
   - pip install -r requirements.txt
 
+services:
+  - postgresql
+
+before_script:
+  - psql -c "CREATE DATABASE blog_db;" -U postgres
+  - psql -c "CREATE DATABASE test_blog_db;" -U postgres
+
 script:
   - pytest --cov=app/
 
