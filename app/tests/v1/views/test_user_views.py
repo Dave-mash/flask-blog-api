@@ -1,12 +1,5 @@
-import unittest
-import datetime
 import json
-import os
 
-from app import create_app
-from app.api.v1.models.base_model import BaseModel
-from app.database import InitializeDb
-from instance.config import app_config
 from ..base_test import BaseTest
 
 class TestUser(BaseTest):

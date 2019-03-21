@@ -67,10 +67,5 @@ class Comment(BaseModel):
     def delete_comment(self, id):
         """ This method deletes a comment """
 
-        if self.fetch_specific_comment('id', f"id = {id}"):
-            return self.base_model.delete_item(f"id = {id}")
-        else:
-            return jsonify({
-                "error": "Comment not found or does not exist!",
-                "status": 400
-            })
+        return self.base_model.delete_item(f"id = {id}")
+

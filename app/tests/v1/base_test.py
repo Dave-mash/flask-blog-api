@@ -23,6 +23,11 @@ class BaseTest(unittest.TestCase):
             "confirm_password": "abc123@1A"
         }
 
+        self.user_login = {
+            "email": self.user_item['email'],
+            "password": self.user_item['password']
+        }
+
         self.post = {
             "title": "Javascript",
             "body": "Javascript is an amazing language"

@@ -131,7 +131,7 @@ def edit_post(postId, userId):
                 }), 200)
             else:
                 return make_response(jsonify({
-                    "error": 'Please log in first',
+                    "error": 'Please log in first!',
                     "status": 403
                 }), 403)
     else:
@@ -147,33 +147,26 @@ def edit_post(postId, userId):
 def delete_post(postId, userId):
     auth_token = request.headers.get('Authorization')
     token = auth_token.split(" ")[1]
+    
+    
+    if not User().blacklisted(token):  
 
-    try:
-        if Post().fetch_specific_post('author_id', f"id = {postId}")[0] == userId:
-            
+        if Post().fetch_specific_post('author_id', f"id = {postId}") == (userId,):
             post = Post().delete_post(postId)
-
             if isinstance(post, dict):
-                return make_response(jsonify(post), 404)
+                return make_response(post)
             else:
-                if not User().blacklisted(token):
-                    return make_response(jsonify({
-                        "error": 'post was deleted successfully',
-                        "status": 200
-                    }), 200)
-                else:
-                    return make_response(jsonify({
-                        "error": 'Please log in first',
-                        "status": 403
-                    }), 403)
-
+                return make_response(jsonify({
+                    "error": 'post was deleted successfully',
+                    "status": 200
+                }), 200)
         else:
             return make_response(jsonify({
                 "error": "You are not authorized to perform this action!",
                 "status": 401
             }), 401)
-    except:
+    else:
         return make_response(jsonify({
-            "error": "Post not found or does not exist",
-            "status": 404
-        }), 404)
+            "error": 'Please log in first',
+            "status": 403
+        }), 403)

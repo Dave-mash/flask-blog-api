@@ -78,16 +78,10 @@ class Post(BaseModel):
             return jsonify({
                 "error": "post not found or does not exist!",
                 "status": 404
-            })
+            }), 404
 
 
     def delete_post(self, id):
         """ This method deletes a post """
 
-        if self.fetch_specific_post('id', f"id = {id}"):
-            return self.base_model.delete_item(f"id = {id}")
-        else:
-            return {
-                "error": "Post not found or does not exist!",
-                "status": 404
-            }
+        return self.base_model.delete_item(f"id = {id}")

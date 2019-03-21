@@ -1,8 +1,5 @@
-import unittest
 import json
 
-from app.database import InitializeDb
-from instance.config import app_config
 from ..base_test import BaseTest
 
 class TestPostViews(BaseTest):
@@ -20,7 +17,8 @@ class TestPostViews(BaseTest):
         """ This method tests the post method """
 
         # successful posting
-        user = self.post_req().json
+        self.post_req()
+        user = self.post_req('api/v1/auth/login', self.user_login).json
         headers = {"Authorization": "Bearer {}".format(user['auth_token'])}
 
         req = self.post_request('api/v1/1/posts', self.post, headers)
@@ -47,11 +45,22 @@ class TestPostViews(BaseTest):
         # test unique title
         self.assertEqual(self.post_req().status_code, 409)
 
+        # test logged out user
+        self.client.post(
+            'api/v1/auth/1/logout',
+            headers=headers,
+            content_type='application/json'
+        )
+        req = self.post_request('api/v1/1/posts', self.post, headers)
+        self.assertEqual(req.json['error'], 'Please log in first!')
+
+
     def test_update_post(self):
         """ This method tests the update post method """
 
         # successful update
-        user = self.post_req().json
+        self.post_req()
+        user = self.post_req('api/v1/auth/login', self.user_login).json
         headers = {"Authorization": "Bearer {}".format(user['auth_token'])}
 
         post = {
@@ -87,14 +96,38 @@ class TestPostViews(BaseTest):
         req6 = self.put_request('api/v1/5/posts/1', post, headers)
         self.assertEqual(req6.json['error'], 'You are not authorized to perform this action!')
 
+        # test logged out user
+        self.client.post(
+            'api/v1/auth/1/logout',
+            headers=headers,
+            content_type='application/json'
+        )
+        self.post_request('api/v1/1/posts', post, headers)
+        req = self.put_request('api/v1/1/posts/1', post, headers)
+        self.assertEqual(req.json['error'], 'Please log in first!')
+
 
     def test_delete_post(self):
         """ This method tests the delete method """
 
         # successful delete
-        user = self.post_req().json
+        self.post_req()
+        user = self.post_req('api/v1/auth/login', self.user_login).json
         headers = {"Authorization": "Bearer {}".format(user['auth_token'])}
 
         self.post_request('api/v1/1/posts', self.post, headers)
         req = self.delete_request('api/v1/1/posts/1', headers=headers)
         self.assertEqual(req.status_code, 200)
+
+        # unauthorized user
+        req6 = self.delete_request('api/v1/5/posts/1', headers)
+        self.assertEqual(req6.json['error'], 'You are not authorized to perform this action!')
+
+        # test logged out user
+        self.client.post(
+            'api/v1/auth/1/logout',
+            headers=headers,
+            content_type='application/json'
+        )
+        req = self.delete_request('api/v1/1/posts/1', headers=headers)
+        self.assertEqual(req.json['error'], 'Please log in first')
