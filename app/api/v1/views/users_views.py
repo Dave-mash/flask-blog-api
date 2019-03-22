@@ -3,7 +3,7 @@ This module defines all the user endpoints
 """
 import json
 import re
-from flask import request, jsonify, make_response, Blueprint, session
+from flask import request, jsonify, make_response, Blueprint
 
 from app.api.v1.models.users import User, AuthenticationRequired
 from app.api.v1.utils.users_validator import UserValidator
@@ -33,7 +33,6 @@ def get():
 @v1.route("/auth/signup", methods=['POST'])
 def registration():
     data = request.get_json()
-    # print('user views called')
 
     # Validate user
     validate_user = UserValidator(data)
