@@ -10,7 +10,7 @@ services:
   - postgresql
 
 before_script:
-  - psql -c "CREATE DATABASE test_blog_db;" -U dave
+  - psql -c "CREATE DATABASE test_blog_db;" -U postgres
 
 script:
   - pytest --cov=app/
