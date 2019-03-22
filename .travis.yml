@@ -15,5 +15,8 @@ before_script:
 script:
   - pytest --cov=app/
 
+env:
+  - TEST_DATABASE_URI=dbname=test_blog_db user=dave host='localhost' port=5432
+
 after_success:
   - coveralls
