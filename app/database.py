@@ -19,7 +19,7 @@ class InitializeDb:
             return cls.cursor
         except:
             print(db_url)
-            print(f'A problem occured while connecting to the {db_url}')
+            print(f'A problem occured while connecting to the {db_url.DB_URL}')
 
 
     @classmethod
