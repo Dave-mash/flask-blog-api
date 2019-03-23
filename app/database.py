@@ -12,7 +12,6 @@ class InitializeDb:
     @classmethod
     def init_db(cls, db_url):
         try:
-            print(os.getenv('TEST_DATABASE_URI'))
             cls.connection = psycopg2.connect(db_url.DB_URL)
             cls.cursor = cls.connection.cursor()
             print(f'A connection to {db_url.DB_URL} database was established!')
