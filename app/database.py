@@ -8,20 +8,16 @@ class InitializeDb:
     def __init__(cls, db_url):
         cls.env = db_url.ENV
 
-
-    @classmethod
-    def init_db(cls, db_url):
         try:
             cls.connection = psycopg2.connect(db_url.DB_URL)
             print(cls.connection)
             cls.cursor = cls.connection.cursor()
             print(f'A connection to {db_url.DB_URL} database was established!')
-            return cls.cursor
         except:
-            print(psycopg2)
+            print('---->', psycopg2)
             print('---->', psycopg2.connect(db_url.DB_URL))
             print(f'A problem occured while connecting to the {db_url.DB_URL}')
-
+        
 
     @classmethod
     def create_tables(cls):
