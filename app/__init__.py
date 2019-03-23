@@ -11,7 +11,7 @@ def create_app(config_name):
     app = Flask(__name__)
     CORS(app)
     app.config.from_object(app_config[config_name])
-    app.secret_key = os.getenv('SECRET_KEY')
+    app.secret_key = app_config[config_name].SECRET_KEY
     app.url_map.strict_slashes = False
 
     from app.api.v1.views.posts_views import v1 as post_v1
@@ -22,7 +22,6 @@ def create_app(config_name):
     app.register_blueprint(post_v1)
     app.register_blueprint(comment_v1)
     
-    print('---->', app_config[config_name])
     db = InitializeDb(app_config[config_name])
     db.init_db(app_config[config_name])
     db.create_tables()
