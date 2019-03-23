@@ -17,7 +17,8 @@ class InitializeDb:
             print(f'A connection to {db_url.DB_URL} database was established!')
             return cls.cursor
         except:
-            print(db_url)
+            print('---->', db_url)
+            print('---->', db_url.DB_URL)
             print(f'A problem occured while connecting to the {db_url.DB_URL}')
 
 
