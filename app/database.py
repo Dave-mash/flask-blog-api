@@ -13,8 +13,7 @@ class InitializeDb:
     def init_db(cls, db_url):
         try:
             print(os.getenv('TEST_DATABASE_URI'))
-            connect = db_url.DB_URL if db_url.DB_URL else os.getenv('TEST_DATABASE_URI')
-            cls.connection = psycopg2.connect(connect)
+            cls.connection = psycopg2.connect(db_url.DB_URL)
             cls.cursor = cls.connection.cursor()
             print(f'A connection to {db_url.DB_URL} database was established!')
             return cls.cursor
