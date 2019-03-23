@@ -22,6 +22,7 @@ def create_app(config_name):
     app.register_blueprint(post_v1)
     app.register_blueprint(comment_v1)
     
+    print('---->', config_name.DB_URL)
     db = InitializeDb(app_config[config_name])
     db.init_db(app_config[config_name])
     db.create_tables()

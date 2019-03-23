@@ -32,7 +32,8 @@ class Production(Config):
     ENV = "production"
     DEBUG = False
     TESTING = False
-    DB_URL = os.getenv('TEST_DATABASE_URI')
+    DB_URL = os.environ['FLASK_DATABASE_URI']
+    SECRET_KEY = os.environ['SECRET_KEY']
 
 app_config = {
     'development': Development,
