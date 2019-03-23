@@ -10,7 +10,8 @@ def create_app(config_name):
     
     app = Flask(__name__)
     CORS(app)
-    app.config.from_object(app_config[config_name])
+    config = config_name if config_name else "development"
+    app.config.from_object(app_config[config])
     app.secret_key = os.getenv('SECRET_KEY')
     app.url_map.strict_slashes = False
 
