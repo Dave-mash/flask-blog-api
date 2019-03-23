@@ -1,5 +1,5 @@
 import os
-from flask import Flask, session
+from flask import Flask, jsonify
 from flask_cors import CORS
 from datetime import timedelta
 
@@ -13,6 +13,13 @@ def create_app(config_name):
     app.config.from_object(app_config[config_name])
     app.secret_key = app_config[config_name].SECRET_KEY
     app.url_map.strict_slashes = False
+
+    @app.route('/')
+    def index():
+        return jsonify({
+            "message": "welcome to the blog app",
+            "status": 200
+        }), 200
 
     from app.api.v1.views.posts_views import v1 as post_v1
     from app.api.v1.views.comments_views import v1 as comment_v1
