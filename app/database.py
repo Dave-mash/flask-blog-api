@@ -15,7 +15,7 @@ class InitializeDb:
             print(f'A connection to {db_url.DB_URL} database was established!')
         except:
             print('---->', psycopg2)
-            print('---->', psycopg2.connect(db_url.DB_URL))
+            # print('---->', psycopg2.connect(db_url.DB_URL))
             print(f'A problem occured while connecting to the {db_url.DB_URL}')
         
 
