@@ -36,7 +36,7 @@ class Production(Config):
     ENV = "production"
     DEBUG = False
     TESTING = False
-    DB_URL = 'postgres://kevllcnzjjheqj:618fdd2780ace3d3087294da0c8152dcc70b71243f61b4dd95773e35f3a24ea5@ec2-54-197-232-203.compute-1.amazonaws.com:5432/d5638sardlpet5'
+    DB_URL = os.getenv('PROD_DATABASE_URI')
 
 
 app_config = {
