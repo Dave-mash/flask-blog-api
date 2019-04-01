@@ -29,14 +29,38 @@ def get():
         }
         posts_list.append(post_item)
 
-    return make_response(jsonify({
+    return jsonify({
         "status": 200,
         "posts": posts_list
-    }), 200)
+    }), 200
+
+
+@v1.route("posts/<int:postId>", methods=['GET'])
+def getPost(postId):
+    try:
+        post = Post().grab_items('(title, body, id, author_id)', f'id = {postId}', 'posts')
+
+        post_item = {
+            "title": post[0]['f1'],
+            "body": post[0]['f2'],
+            "id": post[0]['f3'],
+            "author_id": post[0]['f4']
+        }
+
+        return jsonify({
+            "post": post_item,
+            "status": 200
+        })
+    except:
+        return jsonify({
+            "error": "post not found",
+            "status": 404
+        }), 404
+
 
 
 """ This route posts a post """
-@v1.route("/<int:userId>/posts", methods=['POST'])
+@v1.route("<int:userId>/posts", methods=['POST'])
 @AuthenticationRequired
 def post(userId):
     data = request.get_json()
@@ -80,7 +104,7 @@ def post(userId):
                             "title": data['title'],
                             "body": data['body'],
                             "user": userId,
-                            "post_id": post_model.fetch_post_id(data['title'])[0],
+                            "post_id": post_model.fetch_post_id(data['title'])[0]
                         }
                     }), 201)
             else:
