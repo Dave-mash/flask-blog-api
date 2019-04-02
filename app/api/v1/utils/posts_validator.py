@@ -28,9 +28,5 @@ class PostValidator:
             return "body is a required field!"
 
     def valid_post(self):
-        if len(self.body) < 10:
-            return "Your post is too short. Try being a bit more descriptive"
-        elif len(self.title) < 3:
-            return "Your title is too short!"
-        elif isinstance(self.title, int) or isinstance(self.body, int):
+        if isinstance(self.title, int) or isinstance(self.body, int):
             return "Invalid string"

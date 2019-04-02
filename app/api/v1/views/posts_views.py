@@ -123,6 +123,7 @@ def post(userId):
 @AuthenticationRequired
 def edit_post(postId, userId):
     data = request.get_json()
+    print(data)
     auth_token = request.headers.get('Authorization')
     token = auth_token.split(" ")[1]
     
@@ -130,16 +131,11 @@ def edit_post(postId, userId):
         return make_response(jsonify(PostValidator().post_fields(data)), 400)
     else:
         validate_post = PostValidator(data)
-        validation_methods = [
-            validate_post.valid_post,
-            validate_post.data_exists
-        ]
 
-        for error in validation_methods:
-            if error():
-                return make_response(jsonify({
-                    "error": error()
-                }), 422)
+        if validate_post.valid_post():
+            return make_response(jsonify({
+                "error": validate_post.valid_post()
+            }), 422)
 
     if Post().fetch_specific_post('author_id', f"id = {postId}")[0] == userId:
 
@@ -150,7 +146,7 @@ def edit_post(postId, userId):
         else:
             if not User().blacklisted(token):
                 return make_response(jsonify({
-                    "message": "You have successfully updated this post",
+                    "message": "Post was updated successfully",
                     "status": 200
                 }), 200)
             else:
@@ -181,7 +177,7 @@ def delete_post(postId, userId):
                 return make_response(post)
             else:
                 return make_response(jsonify({
-                    "error": 'post was deleted successfully',
+                    "message": 'post was deleted successfully',
                     "status": 200
                 }), 200)
         else:
