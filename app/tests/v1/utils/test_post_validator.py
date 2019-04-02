@@ -28,15 +28,15 @@ class TestQuestionsValidator(unittest.TestCase):
 
 
     def test_invalid_data(self):
-
-        # test short first name
+    
+        # test short title
         post = {}
         post.update(self.post)
         post['title'] = 'D'
         validator = PostValidator(post)
         self.assertEqual(validator.valid_post(), "Your title is too short!")
 
-        # test short last name
+        # test short body
         post2 = {}
         post2.update(self.post)
         post2['body'] = 'm'

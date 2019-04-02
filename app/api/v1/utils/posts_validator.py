@@ -30,3 +30,7 @@ class PostValidator:
     def valid_post(self):
         if isinstance(self.title, int) or isinstance(self.body, int):
             return "Invalid string"
+        elif len(self.title) < 2:
+            return 'Your title is too short!'
+        elif len(self.body) < 5:
+            return 'Your post is too short. Try being a bit more descriptive'

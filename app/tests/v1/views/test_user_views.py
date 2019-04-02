@@ -120,7 +120,9 @@ class TestUser(BaseTest):
         self.assertEqual(req3.json['error'], 'You missed the first_name key, value pair')
 
         # test none existing user
-        req4 = self.put_request('api/v1/profile/5', update_user, headers)
+        update_user5 = {**update_user}
+        update_user5['username'] = 'junior'
+        req4 = self.put_request('api/v1/profile/5', update_user5, headers)
         self.assertEqual(req4.json['error'], 'User not found or does not exist!')
 
 
