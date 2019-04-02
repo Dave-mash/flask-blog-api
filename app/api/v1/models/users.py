@@ -124,6 +124,13 @@ class User(BaseModel):
         """ This method defines the update query """
 
         image = updates['image'] if updates['image'] else '{user.png}'
+        password = self.fetch_specific_user('password', f"id = '{id}'")
+
+        if not check_password_hash(password[0], updates['password']):
+            return {
+                "error": "Incorrect password!",
+                "status": 403
+            }
 
         pairs_dict = {
             "first_name": f"first_name = '{updates['first_name']}'",
@@ -135,6 +142,12 @@ class User(BaseModel):
         }
         
         pairs = ", ".join(pairs_dict.values())
+
+        if self.fetch_specific_user('username', f"username = '{updates['username']}'"):
+            return {
+                "error": "This username is already taken!",
+                "status": 409
+            }
 
         if self.fetch_specific_user('id', f"id = {id}"):
             return self.base_model.update_item(pairs, f"id = {id}")

@@ -217,7 +217,8 @@ def update_account(userId):
         # email = User().fetch_specific_user('email', f"id = {userId}")
 
         if isinstance(update_user, dict):
-            return make_response(jsonify(update_user))
+            print(update_user)
+            return make_response(jsonify(update_user), update_user['status'])
         elif User().blacklisted(token):
             return make_response(jsonify({
                 "error": "Please log in first!"
