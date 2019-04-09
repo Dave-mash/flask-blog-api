@@ -35,16 +35,19 @@ def get():
     }), 200
 
 
+""" This route fetches a single post """
 @v1.route("posts/<int:postId>", methods=['GET'])
 def getPost(postId):
     try:
         post = Post().grab_items('(title, body, id, author_id)', f'id = {postId}', 'posts')
+        username = User().fetch_specific_user('username', f'id = {post[0]["f4"]}')[0]
 
         post_item = {
             "title": post[0]['f1'],
             "body": post[0]['f2'],
             "id": post[0]['f3'],
-            "author_id": post[0]['f4']
+            "author_id": post[0]['f4'],
+            "username": username
         }
 
         return jsonify({
