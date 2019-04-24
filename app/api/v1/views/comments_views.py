@@ -19,7 +19,6 @@ v1 = Blueprint('commentv1', __name__, url_prefix='/api/v1/')
 def get_comments(postId):
     
     if Post().fetch_specific_post('author_id', f"id = {postId}"):
-        print('--->', Comment().fetch_comments('(comment, post_id, user_id, id)', f'post_id = {postId}'))
         comments = Comment().fetch_comments('(comment, post_id, user_id, id)', f'post_id = {postId}')
         comments_list = []
         for comment in comments:
@@ -28,7 +27,8 @@ def get_comments(postId):
                 "post_id": comment[0]['f2'],
                 "user_id": comment[0]['f3'],
                 "username": User().fetch_specific_user('username', f"id = {comment[0]['f3']}")[0],
-                "id": comment[0]['f4']
+                "id": comment[0]['f4'],
+                "photo": User().fetch_specific_user('image', f"id = {comment[0]['f3']}")[0]
             }
             comments_list.append(obj)
 

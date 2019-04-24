@@ -20,12 +20,14 @@ def get():
 
     for post in posts:
         username = User().fetch_specific_user('username', f"id = {post[0]['f5']}")[0]
+        user_img = User().fetch_specific_user('image', f"id = {post[0]['f5']}")[0]
         post_item = {
             "title": post[0]['f1'],
             "body": post[0]['f2'],
             "createdOn": post[0]['f3'],
             "id": post[0]['f4'],
-            "author": username
+            "author": username,
+            "photo": user_img
         }
         posts_list.append(post_item)
 
